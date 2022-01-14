@@ -1,0 +1,102 @@
+# Set some variables for convenience
+substitutions:
+  node_name: kapcsolo1
+  device_name: Kapcsolo1
+
+esphome:
+  name: $node_name
+  comment: $device_name
+
+esp32:
+  board: esp32dev
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+# Enable wireless updates
+ota:
+  password: !secret ota_pass
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: $device_name Fallback Hotspot
+    password: !secret hotstpot_password
+
+captive_portal:
+
+# Useful for debugging, can be disabled on production use
+web_server:
+  port: 80 
+
+# A reboot button is always useful
+button:
+  - platform: restart
+    name: Restart $device_name
+    device_class: restart
+
+# Define some inputs
+binary_sensor:
+  - platform: gpio
+    name: $device_name Button1
+    pin:
+      number: 4
+      inverted: true
+    on_click:
+     - switch.toggle: relay_1
+
+  - platform: gpio
+    name: $device_name Button2
+    pin:
+      number: 0
+      inverted: true
+    on_click:
+     - switch.toggle: relay_2
+  - platform: gpio
+    name: $device_name Button3
+    pin:
+      number: 15
+      inverted: true
+    on_click:
+     - switch.toggle: relay_3
+
+sensor:
+  - platform: wifi_signal
+    name: $device_name WiFi Signal
+    update_interval: 60s
+
+switch:
+  - platform: gpio
+    name: $device_name Relay 1
+    id: relay_1
+    pin:
+      number: 23
+  - platform: gpio
+    name: $device_name Relay 2
+    id: relay_2
+    pin:
+      number: 19
+  - platform: gpio
+    name: $device_name Relay 3
+    id: relay_3
+    pin:
+      number: 22
+
+# GPIO18 + Light component is for the red lights on the buttons
+output:
+  - platform: ledc
+    pin: GPIO18
+    id: gpio_18
+
+light:
+  - platform: monochromatic
+    output: gpio_18
+    name: $device_name Light
+    default_transition_length: 500ms
+    restore_mode: ALWAYS_ON
+    
